@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\PelangganController;
 use App\Http\Controllers\Admin\PesananController as AdminPesananController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Pengguna\PesananController as PenggunaPesananController;
+use App\Http\Controllers\ProfileController; // <-- TAMBAHKAN INI
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -47,23 +49,21 @@ Route::middleware('auth')->group(function () {
         Route::resource('/pelanggan', PelangganController::class);
         Route::resource('/layanan', LayananController::class);
         Route::resource('/pesanan', AdminPesananController::class);
-        Route::get('/laporan', function () { return "<h1>Halaman Laporan</h1>"; })->name('laporan.index');
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
     });
 
     // GRUP RUTE KHUSUS PENGGUNA (PELANGGAN)
     Route::prefix('pengguna')->name('pengguna.')->middleware('role:pengguna')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'penggunaDashboard'])->name('dashboard');
-
-        // Rute Riwayat dan Detail Pesanan
         Route::get('/pesanan', [PenggunaPesananController::class, 'index'])->name('pesanan.index');
         Route::get('/pesanan/{id}', [PenggunaPesananController::class, 'show'])->name('pesanan.show');
-
-        // PERBAIKAN: Rute untuk membuat pesanan baru
         Route::get('/pesan-baru', [PenggunaPesananController::class, 'create'])->name('pesanan.create');
         Route::post('/pesan-baru', [PenggunaPesananController::class, 'store'])->name('pesanan.store');
     });
 
-    // Rute bersama untuk profil
-    Route::get('/profile', function () { return "<h1>Halaman Profil Saya</h1>"; })->name('profile.show');
+    // RUTE BERSAMA UNTUK PROFIL
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
